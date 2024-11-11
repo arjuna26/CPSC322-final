@@ -3,10 +3,10 @@ name: Lint with pylint
 on:
   pull_request:
     branches:
-      - main  # Replace with your branch name if different
+      - main
 
 jobs:
-  pylint:
+  linting:
     runs-on: ubuntu-latest
     
     steps:
@@ -16,17 +16,21 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'  # Specify your Python version
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pylint jupyter nbconvert
+          pip install pylint jupyter nbconvert autopep8
 
       - name: Convert notebooks to Python scripts
         run: |
           jupyter nbconvert --to script *.ipynb
 
+      - name: Auto-format with autopep8
+        run: |
+          autopep8 --in-place --aggressive --aggressive *.py
+
       - name: Run pylint on converted notebooks
         run: |
-          pylint *.py  # Lint the converted .py files in the root directory
+          pylint *.py
