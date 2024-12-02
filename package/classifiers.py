@@ -1,273 +1,137 @@
-"""
-classifiers.py
-@author arjuna26
-date: 11-20-2024
-"""
-
 import numpy as np
-import random
-from .utils import bootstrap_sample
-from collections import Counter 
 
-
-import numpy as np
-from collections import Counter
+# ---------------------------------------------- Decision tree and Random Forest ----------------------------------------------
 
 class MyDecisionTreeClassifier:
-    """
-    A simple implementation of a decision tree classifier using ID3 with entropy.
-    """
-    def __init__(self):
+    def __init__(self, max_depth=None, min_samples_split=2):
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
         self.tree = None
 
-    def _entropy(self, y):
-        """
-        Calculate the entropy of a dataset.
-
-        Args:
-            y (array-like): Target labels.
-
-        Returns:
-            float: Entropy of the target labels.
-        """
-        counts = Counter(y)
-        total = len(y)
-        return -sum((count / total) * np.log2(count / total) for count in counts.values())
-
-    def _information_gain(self, X_col, y, split_value):
-        """
-        Calculate the information gain for a split on a specific feature.
-
-        Args:
-            X_col (array-like): Column of feature values.
-            y (array-like): Target labels.
-            split_value (float): Split point for the feature.
-
-        Returns:
-            float: Information gain of the split.
-        """
-        left_mask = X_col <= split_value
-        right_mask = X_col > split_value
-
-        left_entropy = self._entropy(y[left_mask])
-        right_entropy = self._entropy(y[right_mask])
-        total_entropy = self._entropy(y)
-
-        n = len(y)
-        n_left = np.sum(left_mask)
-        n_right = np.sum(right_mask)
-
-        weighted_entropy = (n_left / n) * left_entropy + (n_right / n) * right_entropy
-        return total_entropy - weighted_entropy
-
-    def _best_split(self, X, y):
-        """
-        Find the best feature and split value to split on.
-
-        Args:
-            X (np.ndarray): Feature matrix.
-            y (array-like): Target labels.
-
-        Returns:
-            tuple: (best_feature, best_split_value, best_gain)
-        """
-        best_gain = -1
-        best_feature = None
-        best_split_value = None
-
-        for feature_idx in range(X.shape[1]):
-            X_col = X[:, feature_idx]
-            unique_values = np.unique(X_col)
-
-            for split_value in unique_values:
-                gain = self._information_gain(X_col, y, split_value)
-                if gain > best_gain:
-                    best_gain = gain
-                    best_feature = feature_idx
-                    best_split_value = split_value
-
-        return best_feature, best_split_value, best_gain
-
-    def _build_tree(self, X, y):
-        """
-        Recursively build the decision tree.
-
-        Args:
-            X (np.ndarray): Feature matrix.
-            y (array-like): Target labels.
-
-        Returns:
-            dict: The decision tree structure.
-        """
-        # Base case: pure set or no features left
-        if len(set(y)) == 1:
-            return y[0]  # Return the class label
-        if X.shape[1] == 0:
-            return Counter(y).most_common(1)[0][0]  # Return majority class
-
-        # Find the best split
-        best_feature, best_split_value, best_gain = self._best_split(X, y)
-
-        if best_gain == 0:
-            return Counter(y).most_common(1)[0][0]  # Return majority class
-
-        # Partition data
-        left_mask = X[:, best_feature] <= best_split_value
-        right_mask = X[:, best_feature] > best_split_value
-
-        # Recursively build subtrees
-        left_tree = self._build_tree(X[left_mask], y[left_mask])
-        right_tree = self._build_tree(X[right_mask], y[right_mask])
-
-        return {
-            "feature": best_feature,
-            "split_value": best_split_value,
-            "left": left_tree,
-            "right": right_tree
-        }
-
     def fit(self, X, y):
-        """
-        Fit the decision tree to the data.
-
-        Args:
-            X (np.ndarray): Training feature matrix.
-            y (array-like): Target labels.
-        """
         self.tree = self._build_tree(X, y)
 
-    def _predict_instance(self, instance, tree):
-        if isinstance(tree, dict):  # Internal node
-            feature = tree.get("feature")
-            split_value = tree.get("split_value")
+    def _build_tree(self, X, y, depth=0):
+        n_samples, n_features = X.shape
+        n_labels = len(np.unique(y))
 
-            if instance[feature] <= split_value:
-                return self._predict_instance(instance, tree["left"])
-            else:
-                return self._predict_instance(instance, tree["right"])
-        elif isinstance(tree, (int, float)):  # Leaf node
-            return tree
-        else:
-            raise ValueError(f"Unexpected tree node: {tree}")
+        if n_labels == 1:
+            return {'label': y[0]}
+        if n_samples < self.min_samples_split:
+            return {'label': np.bincount(y).argmax()}
+        if self.max_depth is not None and depth >= self.max_depth:
+            return {'label': np.bincount(y).argmax()}
+
+        best_gini = float('inf')
+        best_split = None
+        best_left_y = None
+        best_right_y = None
+        best_left_X = None
+        best_right_X = None
+
+        for feature_idx in range(n_features):
+            thresholds = np.unique(X[:, feature_idx])
+            for threshold in thresholds:
+                left_mask = X[:, feature_idx] <= threshold
+                right_mask = ~left_mask
+
+                left_y = y[left_mask]
+                right_y = y[right_mask]
+
+                if len(left_y) == 0 or len(right_y) == 0:
+                    continue
+
+                gini = self._calculate_gini(left_y, right_y)
+
+                if gini < best_gini:
+                    best_gini = gini
+                    best_split = (feature_idx, threshold)
+                    best_left_y = left_y
+                    best_right_y = right_y
+                    best_left_X = X[left_mask]
+                    best_right_X = X[right_mask]
+
+        if best_split is None:
+            return {'label': np.bincount(y).argmax()}
+
+        left_tree = self._build_tree(best_left_X, best_left_y, depth + 1)
+        right_tree = self._build_tree(best_right_X, best_right_y, depth + 1)
+
+        return {'feature': best_split[0],
+                'threshold': best_split[1],
+                'left': left_tree,
+                'right': right_tree}
+
+    def _calculate_gini(self, left_y, right_y):
+        total_size = len(left_y) + len(right_y)
+        left_size = len(left_y) / total_size
+        right_size = len(right_y) / total_size
+
+        def gini_impurity(y):
+            _, counts = np.unique(y, return_counts=True)
+            probs = counts / len(y)
+            return 1 - np.sum(probs ** 2)
+
+        return left_size * gini_impurity(left_y) + right_size * gini_impurity(right_y)
 
     def predict(self, X):
-        """
-        Predict the class labels for the input data.
+        return np.array([self._predict_sample(sample, self.tree) for sample in X])
 
-        Args:
-            X (np.ndarray): Feature matrix.
+    def _predict_sample(self, sample, tree):
+        if 'label' in tree:
+            return tree['label']
 
-        Returns:
-            np.ndarray: Predicted class labels.
-        """
-        if self.tree is None:
-            raise Exception("Tree has not been fitted yet.")  
-        return np.array([self._predict_instance(instance, self.tree) for instance in X])
-
-
+        feature_val = sample[tree['feature']]
+        if feature_val <= tree['threshold']:
+            return self._predict_sample(sample, tree['left'])
+        else:
+            return self._predict_sample(sample, tree['right'])
 
 class MyRandomForestClassifier:
-    """
-    A basic implementation of a Random Forest Classifier.
-    """
-    def __init__(self, n_trees=10, max_features=2):
-        """
-        Args:
-            n_trees (int): Number of decision trees to build in the forest.
-            max_features (int): Number of features to consider at each split.
-        """
-        self.n_trees = n_trees
+    def __init__(self, n_estimators=100, max_depth=None, min_samples_split=2, max_features=None, bootstrap=True):
+        self.n_estimators = n_estimators
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
         self.max_features = max_features
-        self.trees = []  # List to hold (tree, selected_attributes)
-        self.classes = None
-
-    def _select_attributes(self, available_attributes):
-        """
-        Randomly selects a subset of attributes for splitting.
-
-        Args:
-            available_attributes (list): List of available attribute indices.
-
-        Returns:
-            list: Randomly selected attribute indices.
-        """
-        return random.sample(available_attributes, self.max_features)
-
-    def _build_tree(self, X, y):
-        """
-        Builds a single decision tree using bootstrapped data and random feature selection.
-
-        Args:
-            X (np.ndarray): Training data.
-            y (np.ndarray): Target labels.
-
-        Returns:
-            tuple: Trained decision tree and selected attributes.
-        """
-        tree = MyDecisionTreeClassifier()
-        selected_attributes = self._select_attributes(list(range(X.shape[1])))
-        X_selected = X[:, selected_attributes]
-        tree.fit(X_selected, y)
-        return tree, selected_attributes
-
-    def _bootstrap_sample(self, X, y):
-        """
-        Generates a bootstrap sample of the data.
-
-        Args:
-            X (np.ndarray): Feature matrix.
-            y (np.ndarray): Target vector.
-
-        Returns:
-            tuple: Bootstrapped feature matrix and target vector.
-        """
-        return bootstrap_sample(X, y)
+        self.bootstrap = bootstrap
+        self.trees = []
 
     def fit(self, X, y):
-        """
-        Fits the random forest model to the data.
+        # If max_features is 'sqrt', set it to the square root of the number of features
+        if self.max_features == 'sqrt':
+            self.max_features = int(np.sqrt(X.shape[1]))
+        elif self.max_features is None:
+            self.max_features = X.shape[1]  # Use all features if not specified
 
-        Args:
-            X (np.ndarray): Training feature matrix.
-            y (np.ndarray): Training target vector.
-        """
-        self.classes = np.unique(y)
-        for _ in range(self.n_trees):
-            X_bootstrap, y_bootstrap = self._bootstrap_sample(X, y)
-            tree, selected_attributes = self._build_tree(X_bootstrap, y_bootstrap)
-            self.trees.append((tree, selected_attributes))
+        # Train multiple decision trees
+        for _ in range(self.n_estimators):
+            # Sample the data
+            if self.bootstrap:
+                indices = np.random.choice(range(len(X)), size=len(X), replace=True)
+                X_bootstrap = X[indices]
+                y_bootstrap = y[indices]
+            else:
+                X_bootstrap = X
+                y_bootstrap = y
 
-    def _majority_vote(self, predictions):
-        """
-        Determines the class prediction using majority voting.
+            # Select a random subset of features
+            feature_indices = np.random.choice(range(X.shape[1]), size=self.max_features, replace=False)
+            X_bootstrap = X_bootstrap[:, feature_indices]
 
-        Args:
-            predictions (list): List of class predictions from trees.
-
-        Returns:
-            int/float: Predicted class.
-        """
-        counts = np.bincount(predictions)
-        return np.argmax(counts)
+            # Train a decision tree
+            tree = MyDecisionTreeClassifier(max_depth=self.max_depth, min_samples_split=self.min_samples_split)
+            tree.fit(X_bootstrap, y_bootstrap)
+            self.trees.append((tree, feature_indices))  # Save tree and the features it was trained on
 
     def predict(self, X):
-        """
-        Predicts the class labels for the input data.
-
-        Args:
-            X (np.ndarray): Feature matrix.
-
-        Returns:
-            np.ndarray: Predicted class labels.
-        """
-        if not self.trees:
-            raise ValueError("The model has not been fitted yet.")
-
+        # Collect predictions from each tree
         predictions = []
-        for instance in X:
-            tree_votes = []
-            for tree, selected_attributes in self.trees:
-                instance_subset = instance[selected_attributes]
-                tree_votes.append(tree.predict([instance_subset])[0])
-            predictions.append(self._majority_vote(tree_votes))
-        return np.array(predictions)
+        for tree, feature_indices in self.trees:
+            X_selected = X[:, feature_indices]  # Use only the features selected by this tree
+            predictions.append(tree.predict(X_selected))
+        
+        # Majority voting
+        predictions = np.array(predictions)
+        return np.array([np.bincount(pred).argmax() for pred in predictions.T])  # Majority vote across trees
+
+# ---------------------------------------------------------------------------------------------------------------------------------------
