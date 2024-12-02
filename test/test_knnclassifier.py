@@ -49,9 +49,32 @@ def test_predict_accuracy(knn_classifier, sample_data):
 
 # Test for the score method
 def test_score(knn_classifier, sample_data):
-    X, y = sample_data
+    X, y = sample_data 
     knn_classifier.fit(X, y)
     accuracy = knn_classifier.score(X, y)
     expected_accuracy = accuracy_score(y, y)  # Training on the same data, expect 100% accuracy
     assert accuracy == expected_accuracy, "Score method returned incorrect accuracy"
 
+def test_single_sample(knn_classifier):
+    X = np.array([[1, 2]])
+    y = np.array([0])
+    knn_classifier.fit(X, y)
+    predictions = knn_classifier.predict(X)
+    assert len(predictions) == 1, "Prediction length mismatch for single sample"
+    assert predictions[0] == y[0], "Incorrect prediction for single sample"
+
+# Test for handling empty datasets
+def test_empty_dataset():
+    X = np.array([])
+    y = np.array([])
+    classifier = MyKNNClassifier(n_neighbors=3)
+    with pytest.raises(ValueError, match="Training data cannot be empty"):
+        classifier.fit(X, y)
+        
+# Test for edge case with k=1
+def test_k_equals_one(knn_classifier, sample_data):
+    X, y = sample_data
+    knn_classifier.k = 1  # Set k to 1
+    knn_classifier.fit(X, y)
+    predictions = knn_classifier.predict(X)
+    assert np.array_equal(predictions, y), "k=1 should always predict the nearest neighbor"
