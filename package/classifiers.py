@@ -1,4 +1,5 @@
 import numpy as np
+from collections import Counter
 
 # ---------------------------------------------- Decision tree and Random Forest ----------------------------------------------
 
@@ -134,4 +135,80 @@ class MyRandomForestClassifier:
         predictions = np.array(predictions)
         return np.array([np.bincount(pred).argmax() for pred in predictions.T])  # Majority vote across trees
 
-# ---------------------------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------- kNN Classifier ------------------------------------------------------------
+
+class MyKNNClassifier:
+    def __init__(self, n_neighbors=5, metric='euclidean'):
+        """
+        Initialize the k-Nearest Neighbors classifier.
+
+        Parameters:
+        - n_neighbors: Number of neighbors to consider for classification.
+        - metric: Distance metric ('euclidean' or 'manhattan').
+        """
+        self.n_neighbors = n_neighbors
+        self.metric = metric
+
+    def fit(self, X_train, y_train):
+        """
+        Fit the classifier using the training data.
+
+        Parameters:
+        - X_train: Training features (numpy array).
+        - y_train: Training labels (numpy array).
+        """
+        if len(X_train) == 0 or len(y_train) == 0:
+            raise ValueError("Training data cannot be empty")
+        self.X_train = np.array(X_train)
+        self.y_train = np.array(y_train)
+
+    def _compute_distance(self, x1, x2):
+        """
+        Compute distance between two points based on the specified metric.
+        """
+        if self.metric == 'euclidean':
+            return np.sqrt(np.sum((x1 - x2) ** 2))
+        elif self.metric == 'manhattan':
+            return np.sum(np.abs(x1 - x2))
+        else:
+            raise ValueError(f"Unsupported metric: {self.metric}")
+
+    def predict(self, X_test):
+        """
+        Predict the class labels for the test set.
+
+        Parameters:
+        - X_test: Test features (numpy array).
+
+        Returns:
+        - Predicted class labels (numpy array).
+        """
+        X_test = np.array(X_test)
+        predictions = []
+
+        for test_point in X_test:
+            # Compute distances to all training points
+            distances = [self._compute_distance(test_point, train_point) for train_point in self.X_train]
+            # Get indices of the nearest neighbors
+            neighbor_indices = np.argsort(distances)[:self.n_neighbors]
+            # Get the labels of the nearest neighbors
+            neighbor_labels = [self.y_train[idx] for idx in neighbor_indices]
+            # Majority vote to determine the predicted label
+            most_common = Counter(neighbor_labels).most_common(1)
+            predictions.append(most_common[0][0])
+
+        return np.array(predictions)
+
+    def score(self, X_test, y_test):
+        """
+        Compute the accuracy of the classifier.
+
+        Parameters:
+        - X_test: Test features (numpy array).
+        - y_test: True labels (numpy array).
+
+        Returns:
+        - Accuracy (float).
+        """
+        y_pred = self.predict(X_test)
+        return np.mean(y_pred == y_test)
