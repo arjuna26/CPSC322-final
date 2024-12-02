@@ -1,5 +1,8 @@
 .pytest.ini
 .pytest_cache/
+
 /test/__pycache__/
 /test/.pytest_cache/
+/test/test_real_data.py
+
 /package/__pycache__/

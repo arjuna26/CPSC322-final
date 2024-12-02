@@ -1,4 +1,5 @@
 import pytest
+import os
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -125,25 +126,6 @@ def test_decision_tree_missing_values():
     
     # Make predictions
     y_pred = tree.predict(X_test)
-    
-    # Evaluate accuracy
-    accuracy = accuracy_score(y_test, y_pred)
-    assert accuracy > 0.7, f"Test failed with accuracy: {accuracy}"
-
-# Test decision tree with real data
-def test_decision_tree_real_data():
-    # Load real data
-    data = pd.read_csv('../data/premier_league_data2021-24.csv')  
-    
-    # Preprocess data
-    X_train, X_test, y_train, y_test = preprocess_data(data)
-    
-    # Train the decision tree
-    tree = MyDecisionTreeClassifier(max_depth=5, min_samples_split=2)
-    tree.fit(X_train.values, y_train.values)
-    
-    # Make predictions
-    y_pred = tree.predict(X_test.values)
     
     # Evaluate accuracy
     accuracy = accuracy_score(y_test, y_pred)

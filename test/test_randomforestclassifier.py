@@ -129,14 +129,3 @@ def test_random_forest_hyperparameters(n_estimators, max_features):
     y_pred = rf.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     assert accuracy > 0.55, f"Test failed with n_estimators={n_estimators}, max_features={max_features}, accuracy={accuracy}"
-
-# Test Random Forest with real data
-def test_random_forest_real_data():
-    data = pd.read_csv('../data/premier_league_data2021-24.csv') 
-    X_train, X_test, y_train, y_test = preprocess_data(data)
-    
-    rf = MyRandomForestClassifier(n_estimators=10, max_depth=5, max_features='sqrt', bootstrap=True)
-    rf.fit(X_train.values, y_train.values)
-    y_pred = rf.predict(X_test.values)
-    accuracy = accuracy_score(y_test, y_pred)
-    assert accuracy > 0.6, f"Test failed with accuracy: {accuracy}"
