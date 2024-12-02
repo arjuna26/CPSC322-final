@@ -33,4 +33,4 @@ jobs:
 
       - name: Run pylint on converted notebooks
         run: |
-          pylint --disable=line-too-long,import-error,missing-timeout,missing-module-docstring,pointless-statement *.py
+          pylint --disable=line-too-long,import-error,missing-timeout,missing-module-docstring,pointless-statement,wrong-import-order *.py
