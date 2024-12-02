@@ -115,7 +115,7 @@ def test_decision_tree_overfitting():
 def test_decision_tree_missing_values():
     # Create a simple dataset with missing values
     X, y = make_classification(n_samples=100, n_features=5, random_state=42)
-    X[0, 0] = np.nan  # Introduce a missing value
+    X[0, 0] = np.nan  
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -130,10 +130,10 @@ def test_decision_tree_missing_values():
     accuracy = accuracy_score(y_test, y_pred)
     assert accuracy > 0.7, f"Test failed with accuracy: {accuracy}"
 
-# Test decision tree with real data (e.g., Premier League dataset)
+# Test decision tree with real data
 def test_decision_tree_real_data():
     # Load real data
-    data = pd.read_csv('../data/premier_league_data2021-24.csv')  # Replace with your data file path
+    data = pd.read_csv('../data/premier_league_data2021-24.csv')  
     
     # Preprocess data
     X_train, X_test, y_train, y_test = preprocess_data(data)
@@ -148,4 +148,3 @@ def test_decision_tree_real_data():
     # Evaluate accuracy
     accuracy = accuracy_score(y_test, y_pred)
     assert accuracy > 0.7, f"Test failed with accuracy: {accuracy}"
-
