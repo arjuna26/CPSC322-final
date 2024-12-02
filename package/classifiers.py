@@ -157,6 +157,8 @@ class MyKNNClassifier:
         - X_train: Training features (numpy array).
         - y_train: Training labels (numpy array).
         """
+        if len(X_train) == 0 or len(y_train) == 0:
+            raise ValueError("Training data cannot be empty")
         self.X_train = np.array(X_train)
         self.y_train = np.array(y_train)
 
