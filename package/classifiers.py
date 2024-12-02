@@ -212,3 +212,42 @@ class MyKNNClassifier:
         """
         y_pred = self.predict(X_test)
         return np.mean(y_pred == y_test)
+
+# -------------------------------------------------------- Logistic Regressor Classifier ---------------------------------------------------------
+
+class MyLogisticRegression:
+    def __init__(self, learning_rate=0.01, n_iter=1000):
+        self.learning_rate = learning_rate
+        self.n_iter = n_iter
+        self.weights = None
+        self.bias = None
+
+    def sigmoid(self, z):
+        return 1 / (1 + np.exp(-z))
+    
+    def fit(self, X, y):
+        # Initialize weights and bias
+        n_samples, n_features = X.shape
+        self.weights = np.zeros(n_features)
+        self.bias = 0
+
+        # Gradient Descent
+        for _ in range(self.n_iter):
+            # Linear model
+            linear_model = np.dot(X, self.weights) + self.bias
+            y_predicted = self.sigmoid(linear_model)
+
+            # Compute gradients
+            dw = (1 / n_samples) * np.dot(X.T, (y_predicted - y))
+            db = (1 / n_samples) * np.sum(y_predicted - y)
+
+            # Update weights and bias
+            self.weights -= self.learning_rate * dw
+            self.bias -= self.learning_rate * db
+
+    def predict(self, X):
+        # Predict probabilities
+        linear_model = np.dot(X, self.weights) + self.bias
+        y_predicted = self.sigmoid(linear_model)
+        # Convert probabilities to class labels (threshold = 0.5)
+        return [1 if i > 0.5 else 0 for i in y_predicted]
