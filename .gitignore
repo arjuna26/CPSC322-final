@@ -6,4 +6,6 @@
 /test/test_real_data.py
 
 /package/__pycache__/
-/package/__pycache__/*
+/package/__pycache__
+
+/venv/
