@@ -1,10 +1,9 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, LabelEncoder
-from classifiers import MyRandomForestClassifier
 
 class FootballMatchPredictor:
-    def __init__(self, data_path):
+    def __init__(self, data_path, classifier):
         # Load the data
         self.df = pd.read_csv(data_path)
         
@@ -12,6 +11,8 @@ class FootballMatchPredictor:
         self.features = [
             'xg', 'xga', 'poss', 'sh', 'sot', 'dist', 'fk', 'pk', 'pkatt'
         ]
+        
+        self.classifier = classifier
         
         # Preprocessing methods
         self.label_encoder = LabelEncoder()
@@ -48,8 +49,6 @@ class FootballMatchPredictor:
         # Scale features
         X = self.scaler.fit_transform(X)
         
-        # Train Random Forest Classifier
-        self.classifier = MyRandomForestClassifier(n_estimators=100, max_depth=5)
         
         # Ensure X and y are NumPy arrays
         X = np.array(X)
