@@ -85,12 +85,3 @@ class FootballMatchPredictor:
             return home_team
         else:
             return away_team
-
-# Example usage
-if __name__ == "__main__":
-    # Replace with your actual data path
-    predictor = FootballMatchPredictor('../data/premier_league_data2021-24.csv')
-    
-    # Predict match winner
-    winner = predictor.predict_match('Chelsea', 'Manchester City')
-    print(f"Predicted Winner: {winner}")
