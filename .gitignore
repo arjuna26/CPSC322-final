@@ -9,3 +9,10 @@
 /package/__pycache__
 
 /venv/
+
+/flask/node_modules/
+/flask/__pycache__/
+/flask/.pytest_cache/
+/flask/package-lock.json
+/flask/package.json
+/flask/tailwind.config.js

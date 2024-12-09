@@ -29,8 +29,7 @@ def bootstrap_sample(X, y):
 
 def preprocess_data(data: pd.DataFrame):
     # Drop the first empty column and 'notes' column
-    data = data.drop(columns=[data.columns[0], 'notes'])
-    data = data.drop(columns=['date', 'time', 'comp', 'round', 'referee', 'match report'])
+    df = data.drop(columns=[data.columns[0], 'notes', 'date', 'time', 'comp', 'round', 'referee', 'match report'])
     
     # Fill missing values in numeric columns with the median and categorical with mode
     for col in data.select_dtypes(include=['float64', 'int64']).columns:
@@ -58,3 +57,7 @@ def preprocess_data(data: pd.DataFrame):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=50) #42 gives 98.9% accuracy
     
     return X_train, X_test, y_train, y_test
+
+
+# =============================================================================
+
