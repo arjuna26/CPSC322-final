@@ -21,7 +21,7 @@ def sample_data():
 
 @pytest.fixture
 def knn_classifier():
-    return MyKNNClassifier(n_neighbors=3)
+    return MyKNNClassifier(n_neighbors=3, metric='euclidean', mode='default')
 
 # Test for the fit method
 def test_fit(knn_classifier, sample_data):

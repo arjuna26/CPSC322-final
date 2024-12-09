@@ -138,7 +138,7 @@ class MyRandomForestClassifier:
 # ----------------------------------------------------------- kNN Classifier ------------------------------------------------------------
 
 class MyKNNClassifier:
-    def __init__(self, n_neighbors=5, metric='euclidean'):
+    def __init__(self, n_neighbors=5, metric='euclidean', mode='default'):
         """
         Initialize the k-Nearest Neighbors classifier.
 
@@ -148,6 +148,7 @@ class MyKNNClassifier:
         """
         self.n_neighbors = n_neighbors
         self.metric = metric
+        self.mode = mode
 
     def fit(self, X_train, y_train):
         """
@@ -181,6 +182,17 @@ class MyKNNClassifier:
             return np.sum(np.abs(x1 - x2))
         else:
             raise ValueError(f"Unsupported metric: {self.metric}")
+        
+    def _test_compute_distance(self, x1, x2):
+        """
+        Compute distance between two points based on the specified metric.
+        """
+        if self.metric == 'euclidean':
+            return np.sqrt(np.sum((x1 - x2) ** 2))
+        elif self.metric == 'manhattan':
+            return np.sum(np.abs(x1 - x2))
+        else:
+            raise ValueError(f"Unsupported metric: {self.metric}")
 
     def predict(self, X_test):
         """
@@ -197,7 +209,10 @@ class MyKNNClassifier:
 
         for test_point in X_test:
             # Compute distances to all training points
-            distances = [self._compute_distance(test_point, train_point) for train_point in self.X_train]
+            if self.mode == 'default':
+                distances = [self._compute_distance(test_point, train_point) for train_point in self.X_train]
+            elif self.mode == 'test':
+                distances = [self._test_compute_distance(test_point, train_point) for train_point in self.X_train]
             # Get indices of the nearest neighbors
             neighbor_indices = np.argsort(distances)[:self.n_neighbors]
             # Get the labels of the nearest neighbors
