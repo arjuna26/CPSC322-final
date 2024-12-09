@@ -178,7 +178,7 @@ class MyKNNClassifier:
                     continue
             return np.sqrt(np.sum((sum(x1)/len(x1) - (sum(x2)/len(x2)) ** 2)))
         elif self.metric == 'test':
-            return np.sqrt(np.sum(x1 - x2) ** 2)
+            return np.sqrt(np.sum(x1a - x2a) ** 2)
         else:
             raise ValueError(f"Unsupported metric: {self.metric}")
         
