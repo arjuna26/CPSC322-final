@@ -162,16 +162,26 @@ class MyKNNClassifier:
         self.X_train = np.array(X_train)
         self.y_train = np.array(y_train)
 
-    def _compute_distance(self, x1, x2):
+    def _compute_distance(self, x1a, x2a):
         """
         Compute distance between two points based on the specified metric.
         """
+        x1 = []
+        x2 = []
+        # Iterate through each feature and extract numeric values
         if self.metric == 'euclidean':
-            return np.sqrt(np.sum((x1 - x2) ** 2))
-        elif self.metric == 'manhattan':
-            return np.sum(np.abs(x1 - x2))
+            for v1, v2 in zip(x1a, x2a):
+                if isinstance(v1, (int, float)):  # Check if the value is numeric
+                    x1.append(v1)
+                    x2.append(v2)
+                else:
+                    continue
+            return np.sqrt(np.sum((sum(x1)/len(x1) - (sum(x2)/len(x2)) ** 2)))
+        elif self.metric == 'test':
+            return np.sqrt(np.sum(x1a - x2a) ** 2)
         else:
             raise ValueError(f"Unsupported metric: {self.metric}")
+        
 
     def predict(self, X_test):
         """
@@ -188,6 +198,7 @@ class MyKNNClassifier:
 
         for test_point in X_test:
             # Compute distances to all training points
+            
             distances = [self._compute_distance(test_point, train_point) for train_point in self.X_train]
             # Get indices of the nearest neighbors
             neighbor_indices = np.argsort(distances)[:self.n_neighbors]
