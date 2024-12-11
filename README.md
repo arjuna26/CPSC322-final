@@ -85,5 +85,11 @@ data from: [fbref.com](https://fbref.com/), scarped with help of **[2]**
 thank you!
 ```
 
-flask app hosted on Render @ https://cpsc322-final.onrender.com/
+flask app hosted on Render @ https://cpsc322-final.onrender.com/ \
+Data collection: `scarping.ipynb` at project root \
+EDA: `mining.ipynb` at project root \
+Classifier implementation: `package/classifiers.py` \
+Flask app: `flask/app.py` \
+Technical Report: `docs/techreport.ipynb`
+
 
