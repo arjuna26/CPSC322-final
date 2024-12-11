@@ -42,3 +42,48 @@ The results of this project could provide insights into key factors that influen
 - **Sports Teams and Coaches**: May leverage predictions to inform strategy and analyze match factors.
 - **Data Scientists and Machine Learning Practitioners**: Those looking to explore sports analytics and model classification tasks on sports data.
 
+### Classifiers
+I chose to implement 3 classifiers for this prediction task:
+1. random forest
+2. k-nearest neighbors
+3. decision tree
+
+For my random forest classifier, I based my implementation off previous utility functions from CPSC322, along with the pseudocode provided by **[3]**. Essentially, this classifer builds an ensemble of decision tree classifiers. Each tree is trained on a bootstrapped sample of the training data, with a random subset of features considered for splits to ensure diversity. My random forest classifier creates predictions using majority voting. Key parameters include `max_depth` and `n_estimators` \
+\
+My decision trees themselves split nodes using the Gini impurity criterion **[4]**, and halts this splitting when the `max_depth` threshold is reached. \
+\
+Finally, my k-nearest neighbors classifier predicts class labels based on the majority label of the `n_neighbors` closest training samples to a test point. Distances between samples are computed using the Euclidean metric. \
+\
+To test these classifiers, I created a `pytest` suite, with tests for all classifiers. The unit tests can be found in the `/test` directory. I also created a data preprocessing method to fit my classifiers to the data in order to compare their performance with my actual data. Let's write some code to display these results.
+
+### Summary
+I learned quite a few things from this project, across different areas of computer science. Some of my takeaways from this project (I guess you could say "how tos"):
+* how to use `Flask` to quickly set up web apps: I did not know you could render HTML so simply with a CSS framework and everything with a `Flask` server
+* how to set up directories and import code across them with `.py/ipynb`
+* how to create custom classifiers and use them to make predictions: previous projects have only ever involved using prebuilt classifiers
+* how to create a pytest suite and integrate it into CI with Github actions, as well as a Python linter
+
+This project also taught me how important it is to have working data preprocessing. The data has to be fine tuned to give good results, and creating a method from scratch for my specific use case was challenging. The concept of label encoding took a while to understand completely, and it took me some time to develop the correct data preprocessing method for my classification task. \
+Future work would involve improving the Flask UI, supporting more insight into the model to be displayed on the frontend, further data scraping, and hosting of the `Flask` application
+
+### Sources
+
+[1] [Ryan Kelly - What is xG in football & how is the statistic calculated?](https://www.goal.com/en/news/what-is-xg-football-how-statistic-calculated/h42z0iiv8mdg1ub10iisg1dju) \
+[2] [Vikas Paruchuri - Web Scraping Football Matches From The EPL With Python](https://www.youtube.com/watch?v=Nt7WJa2iu0s&t=1s) \
+[3] [UW Madison Computer Science Department - Random Forests](https://pages.cs.wisc.edu/~matthewb/pages/notes/pdf/ensembles/RandomForests.pdf) \
+[4] [Stack Exchange - When should I use Gini Impurity](https://datascience.stackexchange.com/questions/10228/when-should-i-use-gini-impurity-as-opposed-to-information-gain-entropy) \
+[5] [DaisyUI docs](https://daisyui.com/)
+
+data from: [fbref.com](https://fbref.com/), scarped with help of **[2]**
+
+*ai usage: ChatGPT was used to help debug and write comments on code, it also helped rebuild my preprocessing method.* \
+*python libraries: sklearn, pandas, numpy, searborn, matplotlib* 
+
+
+
+```bash
+thank you!
+```
+
+flask app hosted on Render @ https://cpsc322-final.onrender.com/
+
